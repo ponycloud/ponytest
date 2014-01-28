@@ -4,12 +4,7 @@
 import pytest
 import json
 
-from time import sleep
-
-from ponycloud.celly import Celly
-from ponycloud.common.schema import schema
-from ponycloud.celly import *
-
+from celly import *
 from ponytest import *
 
 
@@ -108,7 +103,6 @@ def test_post_host():
 
     cleanup.append(lambda: celly.host[uuid].delete())
 
-    sleep(1)
     assert superset(celly.host[uuid].desired, data['desired'])
 
 
@@ -141,7 +135,6 @@ def test_post_host_with_nics():
 
     cleanup.append(lambda: celly.host[host_uuid].delete())
 
-    sleep(1)
     assert superset(celly.host[host_uuid].desired, data['desired'])
     assert superset(celly.host[host_uuid].nic[nic_hwaddr].desired,
                     data['children']['nic'][nic_hwaddr]['desired'])
