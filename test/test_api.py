@@ -161,6 +161,10 @@ def test_post_host_to_entity():
 
 def test_delete_host():
     uuid = '6a01061e-82b0-4e21-bd61-753462d47ccd'
+
+    if uuid not in celly.host:
+        pytest.skip('host %r does not exist, cannot delete')
+
     muster = {'uuids': {}}
     value = celly.request(celly.host[uuid].uri, 'DELETE')
     assert value == muster
