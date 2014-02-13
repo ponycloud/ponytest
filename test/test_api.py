@@ -6,6 +6,7 @@ import json
 
 from celly import *
 from ponytest import *
+from uuid import uuid4
 
 
 celly = Celly(headers={
@@ -88,7 +89,7 @@ def test_post_nonsense_dict_host():
 
 
 def test_post_host():
-    uuid = 'this_host_does_not_exist_yet'
+    uuid = str(uuid4())
     data = {
         'desired': {
             'uuid': uuid,
@@ -98,8 +99,7 @@ def test_post_host():
         }
     }
 
-    result = celly.host.post(data)
-    uuid = data['desired']['uuid'] = result['uuids'][uuid]
+    assert celly.host.post(data)
 
     cleanup.append(lambda: celly.host[uuid].delete())
 
@@ -107,7 +107,7 @@ def test_post_host():
 
 
 def test_post_host_with_nics():
-    host_uuid = 'this_host_does_not_exist_yet'
+    host_uuid = str(uuid4())
     nic_hwaddr = '22:22:22:22:22:22'
 
     data = {
@@ -129,9 +129,7 @@ def test_post_host_with_nics():
         }
     }
 
-    result = celly.host.post(data)
-    host_uuid = data['desired']['uuid'] = result['uuids'][host_uuid]
-    data['children']['nic'][nic_hwaddr]['desired']['host'] = host_uuid
+    assert celly.host.post(data)
 
     cleanup.append(lambda: celly.host[host_uuid].delete())
 
@@ -142,7 +140,7 @@ def test_post_host_with_nics():
 
 def test_post_host_to_entity():
     existing_uuid = 'f4f69922-5409-410d-b9b0-198c9389650f'
-    uuid = 'this_host_does_not_exist_yet'
+    uuid = str(uuid4())
 
     data = {
         'desired': {
