@@ -195,6 +195,85 @@ def test_delete_host_attribute():
     simple_negative_test(uri, NotFoundError, 'DELETE')
 
 
+def test_post_bond():
+    existing_host = 'f4f69922-5409-410d-b9b0-198c9389650f'
+    bond_uuid = 'new_bond'
+    bond_data = {
+            'desired': {
+                'uuid': bond_uuid,
+                'mode': 'active-backup'
+            },
+            'children': {
+                'nic': {
+                    '11:22:22:22:22:22': {
+                        'desired': {
+                            'hwaddr': '11:22:22:22:22:22',
+                            'host': existing_host
+                        }
+                    },
+                    '44:22:22:22:22:22': {
+                        'desired': {
+                            'hwaddr': '44:22:22:22:22:22',
+                            'host': existing_host
+                        }
+                    }
+                }
+            }
+        }
+
+    # Post the data and take placeholder for verification
+    posted = celly.host[existing_host].bond.post(bond_data)
+    bond_uuid = posted['uuids'][bond_uuid]
+
+    # Verify bond we just inserted.
+    new_bond = celly.host[existing_host].bond[bond_uuid]
+    bond_data['desired']['uuid'] = bond_uuid
+    assert superset(new_bond.desired, bond_data['desired'])
+
+    # Verify its nics as well.
+    nic_muster = [x['desired'] for x in bond_data['children']['nic'].values()]
+    new_nics = [item.desired for item in new_bond.nic.list]
+    assert superset(new_nics, nic_muster)
+
+    # Cleanup the mess.
+    to_delete = [
+        lambda: celly.host[existing_host].nic['44:22:22:22:22:22'].delete(),
+        lambda: celly.host[existing_host].nic['11:22:22:22:22:22'].delete(),
+        lambda: celly.host[existing_host].bond[bond_uuid].delete()
+    ]
+
+    for item in to_delete:
+        cleanup.append(item)
+
+
+@pytest.mark.xfail(reason='We do not support non-immediate parents yet')
+def test_negative_post_bond():
+    existing_host = 'f4f69922-5409-410d-b9b0-198c9389650f'
+    bond_uuid = 'new_bond'
+    bond_data = {
+            'desired': {
+                'uuid': bond_uuid,
+                'mode': 'active-backup'
+            },
+            'children': {
+                'nic': {
+                    '11:22:22:22:22:22': {
+                        'desired': {
+                            'hwaddr': '11:22:22:22:22:22',
+                        }
+                    },
+                    '44:22:22:22:22:22': {
+                        'desired': {
+                            'hwaddr': '44:22:22:22:22:22',
+                        }
+                    }
+                }
+            }
+        }
+    assert celly.host[existing_host].bond.post(bond_data)
+
+
+
 def test_cleanup():
     for job in cleanup:
         job()
