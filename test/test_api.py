@@ -272,6 +272,45 @@ def test_negative_post_bond():
         }
     assert celly.host[existing_host].bond.post(bond_data)
 
+def test_patch_host():
+    existing_host = 'f4f69922-5409-410d-b9b0-198c9389650f'
+
+    patch = [{'op': 'add',
+              'path': '/children/bond/%autoid0',
+              'value': {'children': {'roles': {'%autoid1': {'desired': {'address': None,
+                                                                        'role': 'storage',
+                                                                        'uuid': '%autoid1'}}}},
+                        'desired': {'mode': 'active-backup', 'uuid': '%autoid0'}}},
+             {'op': 'add',
+              'path': '/children/bond/%autoid0/children/role/%autoid1',
+              'value': {'desired': {'address': None,
+                                    'role': 'storage',
+                                    'uuid': '%autoid1'}}},
+             {'op': 'merge',
+              'path': '/children/bond/3b1c5852-d1fe-438c-a3fc-16c9b5b92d75',
+              'value': {'children': {'nics': {'1a:2b:3c:4d:5e:6f': {'desired': {'hwaddr': '1a:2b:3c:4d:5e:6f'}}},
+                                     'roles': {'%autoid2': {'desired': {'address': None,
+                                                                        'role': 'management',
+                                                                        'uuid': '%autoid2'}},
+                                               '6518215b-d7b8-4c91-84b2-512a8fb82ad2': {'desired': {'bond': '3b1c5852-d1fe-438c-a3fc-16c9b5b92d75',
+                                                                                                    'role': 'core',
+                                                                                                    'uuid': '6518215b-d7b8-4c91-84b2-512a8fb82ad2',
+                                                                                                    'vlan_id': 1}}}},
+                        'desired': {'mode': '802.3ad', 'xmit_hash_policy':'layer2+3'}}},
+             {'op': 'add',
+              'path': '/children/bond/3b1c5852-d1fe-438c-a3fc-16c9b5b92d75/children/role/%autoid2',
+              'value': {'desired': {'address': None,
+                                    'role': 'management',
+                                    'uuid': '%autoid2'}}},
+             {'op': 'merge',
+              'path': '/children/nic/1a:2b:3c:4d:5e:6f/desired',
+              'value': {'bond': '3b1c5852-d1fe-438c-a3fc-16c9b5b92d75'}}]
+
+
+    assert celly.host[existing_host].patch(patch)
+
+
+
 
 
 def test_cleanup():
