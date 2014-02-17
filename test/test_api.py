@@ -59,33 +59,29 @@ def test_host_nic():
 
 def test_non_existent_host():
     uuid = '88888888-8888-8888-8888-888888888888'
-    with pytest.raises(RequestError) as ex:
+    with pytest.raises(PathError):
         celly.host[uuid].desired
-    assert isinstance(ex.value, NotFoundError)
 
 
 def test_non_existent_host_nics():
     uuid = '88888888-8888-8888-8888-888888888888'
-    with pytest.raises(RequestError) as ex:
+    with pytest.raises(PathError):
         nics = celly.host[uuid].nic.uri
         celly.request(nics)
-    assert isinstance(ex.value, NotFoundError)
 
 
 def test_post_nonsense_host():
-    with pytest.raises(RequestError) as ex:
+    with pytest.raises(DataError) as ex:
         celly.host.post(u'"Wrong" data, that should break it.\n' \
                         u'Příliš žluťoučký kůň úpěl ďábelské ódy.')
-    assert isinstance(ex.value, BadRequestError)
 
 
 def test_post_nonsense_dict_host():
-    with pytest.raises(RequestError) as ex:
+    with pytest.raises(DataError) as ex:
         celly.host.post({
             '0': 'Wrong data, that should break it.',
             '1': u'Příliš žluťoučký kůň úpěl ďábelské ódy.'
         })
-    assert isinstance(ex.value, BadRequestError)
 
 
 def test_post_host():
@@ -153,46 +149,41 @@ def test_post_host_to_entity():
 
     uri = celly.host[existing_uuid].uri
 
-    with pytest.raises(RequestError) as ex:
+    with pytest.raises(MethodError):
         celly.request(uri, 'POST', json.dumps(data))
-
-    assert isinstance(ex.value, MethodNotAllowedError)
 
 
 def test_delete_host():
     uuid = '6a01061e-82b0-4e21-bd61-753462d47ccd'
 
     if uuid not in celly.host:
-        pytest.skip('host %r does not exist, cannot delete')
+        pytest.skip('host %r does not exist, cannot delete' % (uuid,))
 
-    muster = {'uuids': {}}
-    value = celly.request(celly.host[uuid].uri, 'DELETE')
-    assert value == muster
+    assert celly.request(celly.host[uuid].uri, 'DELETE') == {'uuids': {}}
 
 
 def simple_negative_test(uri, expected_error, method):
-    with pytest.raises(RequestError) as ex:
+    with pytest.raises(expected_error):
         celly.request(uri, method)
-    assert isinstance(ex.value, expected_error)
 
 
 def test_delete_host_nic_collection():
     uri = celly.host['f4f69922-5409-410d-b9b0-198c9389650f'].nic.uri
-    simple_negative_test(uri, MethodNotAllowedError, 'DELETE')
+    simple_negative_test(uri, MethodError, 'DELETE')
 
 
 def test_delete_non_existant_host():
     uri = celly.host['88888888-8888-9999-0000-888888888888'].uri
-    simple_negative_test(uri, NotFoundError, 'DELETE')
+    simple_negative_test(uri, PathError, 'DELETE')
 
 
 def test_delete_root():
-    simple_negative_test(celly.uri + '/', MethodNotAllowedError, 'DELETE')
+    simple_negative_test(celly.uri + '/', MethodError, 'DELETE')
 
 
 def test_delete_host_attribute():
     uri = celly.host['f4f69922-5409-410d-b9b0-198c9389650f'].uri + '/state'
-    simple_negative_test(uri, NotFoundError, 'DELETE')
+    simple_negative_test(uri, PathError, 'DELETE')
 
 
 def test_post_bond():
