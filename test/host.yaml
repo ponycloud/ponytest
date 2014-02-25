@@ -1,0 +1,62 @@
+%YAML 1.2
+---
+host:
+  6481bc19-4f11-41ae-a994-91f36016a069:
+    desired:
+      uuid: 6481bc19-4f11-41ae-a994-91f36016a069
+      info: Testing host to be merged-in
+      state: present
+      fencing: '{}'
+
+    children:
+      nic:
+        00:00:00:11:11:11:
+          desired:
+            bond: $first-bond
+
+        00:00:00:22:22:22:
+          desired:
+            bond: $first-bond
+
+        00:00:00:33:33:33:
+          desired:
+            bond: $second-bond
+
+        00:00:00:44:44:44:
+          desired:
+            bond: $second-bond
+
+      bond:
+        $first-bond:
+          desired:
+            mode: active-backup
+
+          children:
+            role:
+              $management-role:
+                desired:
+                  role: management
+                  address: 192.168.8.11/22
+
+              $core-role:
+                desired:
+                  role: core
+
+              $public-role:
+                desired:
+                  role: public
+                  address: 192.168.8.11/22
+
+        $second-bond:
+          desired:
+            mode: 802.3ad
+            lacp_rate: fast
+            xmit_hash_policy: layer2+3
+
+          children:
+            role:
+              $storage-role:
+                desired:
+                  role: storage
+                  address: 192.168.16.11/22
+
