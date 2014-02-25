@@ -6,7 +6,7 @@ host:
       uuid: 6481bc19-4f11-41ae-a994-91f36016a069
       info: Testing host to be merged-in
       state: present
-      fencing: '{}'
+      fencing: {}
 
     children:
       nic:

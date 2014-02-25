@@ -270,7 +270,12 @@ def test_merge_host():
         data = yaml.load(fp)
 
     res = celly.host.merge(data['host'])
-    cleanup.append(lambda: celly.host[data['host'].keys()[0]].delete())
+    host = celly.host[data['host'].keys()[0]]
+    cleanup.append(lambda: host.delete())
+
+    assert host.desired.get('fencing') == {}
+    assert 4 == len(host.nic)
+    assert 2 == len(host.bond)
 
 
 def test_cleanup():
