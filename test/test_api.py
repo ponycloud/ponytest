@@ -5,14 +5,12 @@ import pytest
 import json
 import yaml
 
+from config import *
 from celly import *
 from ponytest import *
 from uuid import uuid4
 
-
-celly = Celly(headers={
-    'Authorization': 'Basic bHVuYUBwb25pZXMuY29tOmNva29saXZ=',
-})
+celly = Celly(auth=AUTH_ALICORN)
 
 cleanup = []
 
